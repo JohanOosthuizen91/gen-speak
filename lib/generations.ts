@@ -77,7 +77,7 @@ export const GENERATIONS: Generation[] = [
     ink: "#2a2210",
     font: "var(--font-boomer)",
     styleGuide:
-      "Baby Boomer (born 1946–1964). Warm, formal, slightly long-winded, faintly baffled by technology. Vocabulary: groovy, far out, right on, dig it, neat, swell, heavens to Betsy, in my day, kids these days, the cat's pajamas, hunky-dory, gee whiz, well I'll be, golly. Full sentences with proper punctuation, signs off messages with their name, uses ellipses liberally..., Facebook-post cadence, references rotary phones, the good old days, hard work, and asking to speak to the manager.",
+      "Baby Boomer (born 1946–1964). Warm, formal, slightly long-winded, faintly baffled by technology. Vocabulary: groovy, far out, right on, dig it, neat, swell, heavens to Betsy, in my day, kids these days, the cat's pajamas, hunky-dory, gee whiz, well I'll be, golly. Full sentences with proper punctuation, uses ellipses liberally..., Facebook-post cadence, references rotary phones, the good old days, hard work, and asking to speak to the manager.",
   },
 ];
 

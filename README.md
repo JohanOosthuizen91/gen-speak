@@ -13,13 +13,25 @@ npm run dev
 ## LLM provider
 
 The API route talks to any OpenAI-compatible `/chat/completions` endpoint. Defaults target Groq's free tier
-(`llama-3.1-8b-instant`), which is fast and costs nothing for hobby traffic.
+(`openai/gpt-oss-20b`), which is fast and costs nothing for hobby traffic.
 
-| Variable       | Default                            | Notes                                   |
-| -------------- | ---------------------------------- | --------------------------------------- |
-| `LLM_API_KEY`  | (required)                         | Groq key from console.groq.com/keys     |
-| `LLM_BASE_URL` | `https://api.groq.com/openai/v1`   | Swap for OpenRouter, Together, etc.     |
-| `LLM_MODEL`    | `llama-3.1-8b-instant`             | Any chat model the endpoint supports    |
+| Variable                | Default                          | Notes                                     |
+| ----------------------- | -------------------------------- | ----------------------------------------- |
+| `LLM_API_KEY`           | (required)                       | Groq key from console.groq.com/keys       |
+| `LLM_BASE_URL`          | `https://api.groq.com/openai/v1` | Swap for OpenRouter, Together, etc.       |
+| `LLM_MODEL`             | `openai/gpt-oss-20b`             | Any chat model the endpoint supports      |
+| `LLM_REASONING_EFFORT`  | `low`                            | gpt-oss only. Clear it for other models.  |
+
+Groq retires models fairly often. If translating starts failing, list what your key can currently reach
+and update `LLM_MODEL` to match:
+
+```bash
+curl -s https://api.groq.com/openai/v1/models -H "Authorization: Bearer $LLM_API_KEY"
+```
+
+Two things to know when changing `LLM_MODEL`. Only the gpt-oss models accept `LLM_REASONING_EFFORT`, and
+everything else returns a 400 while it is set, so clear it. Reasoning models also spend part of the token
+budget thinking before they answer, which is why `reasoning_effort` is set low by default.
 
 ## Deploy to Vercel
 
