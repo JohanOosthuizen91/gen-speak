@@ -25,6 +25,26 @@ function dropEcho(output: string, input: string): string {
 }
 
 /**
+ * A degenerating model restates its answer over and over. The prompt asks for one
+ * paragraph, so keep at most two blocks and stop at the first one that repeats.
+ */
+function collapseRepeats(output: string): string {
+  const blocks = output.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean);
+  if (blocks.length < 2) return output;
+
+  const seen = new Set<string>();
+  const kept: string[] = [];
+  for (const block of blocks) {
+    const key = normalize(block).slice(0, 30);
+    if (seen.has(key)) break;
+    seen.add(key);
+    kept.push(block);
+    if (kept.length === 2) break;
+  }
+  return kept.join("\n\n");
+}
+
+/**
  * True when the model barely touched the input, either returning it outright or
  * bolting emoji and a slang word onto the original sentence. The whole original
  * surviving verbatim inside the output means no real rewrite happened.
@@ -62,7 +82,7 @@ export async function POST(req: Request) {
   if (!generation) return NextResponse.json({ error: "Unknown generation." }, { status: 400 });
 
   const baseUrl = (process.env.LLM_BASE_URL ?? "https://api.groq.com/openai/v1").replace(/\/$/, "");
-  const model = process.env.LLM_MODEL ?? "openai/gpt-oss-20b";
+  const model = process.env.LLM_MODEL ?? "openai/gpt-oss-120b";
   // Only the gpt-oss models accept reasoning_effort; others reject the request with a 400.
   const reasoningEffort = process.env.LLM_REASONING_EFFORT?.trim();
 
@@ -72,15 +92,13 @@ ${generation.styleGuide}
 
 Rules:
 - Preserve the original meaning and intent. Do not add new facts.
-- Keep roughly the same length as the input (a little longer is fine).
-- Replace the original wording with slang equivalents. Keeping the sentence as it
-  was and bolting emoji or a catchphrase onto it is not a rewrite. Most of the
-  content words must differ from the input.
-- Follow the capitalisation habits of the generation above, not those of the input.
-- Never restate, quote or echo the original message before your rewrite.
-- Lean hard into the voice; be funny but not mean or offensive.
-- Never invent a sign-off or a placeholder like [Your Name].
-- Output ONLY the rewritten message. No preamble, no quotes, no explanation.`;
+- Reply with exactly one short paragraph, roughly the length of the input.
+- Replace the original wording with slang equivalents. Most content words must
+  differ from the input.
+- Use the capitalisation habits of the generation described above.
+- Write as the sender of the message, speaking to the same reader.
+- Be funny, never mean or offensive.
+- Your entire reply is the rewritten message and nothing else.`;
 
   async function attempt() {
     const upstream = await fetch(`${baseUrl}/chat/completions`, {
@@ -107,9 +125,13 @@ Rules:
 
     const data = await upstream.json();
     const raw: string = data.choices?.[0]?.message?.content ?? "";
-    // Some models emit their chain of thought inline instead of in a separate field.
-    const cleaned = raw.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
-    return { ok: true as const, translation: dropEcho(cleaned, text) };
+    const cleaned = raw
+      // Some models emit their chain of thought inline instead of in a separate field.
+      .replace(/<think>[\s\S]*?<\/think>/g, "")
+      // gpt-oss can leak channel markers such as <|constrain|> into the text.
+      .replace(/<\|[^|>]*\|>/g, "")
+      .trim();
+    return { ok: true as const, translation: collapseRepeats(dropEcho(cleaned, text)) };
   }
 
   let outcome = await attempt();

@@ -13,13 +13,18 @@ npm run dev
 ## LLM provider
 
 The API route talks to any OpenAI-compatible `/chat/completions` endpoint. Defaults target Groq's free tier
-(`openai/gpt-oss-20b`), which is fast and costs nothing for hobby traffic.
+(`openai/gpt-oss-120b`), which is fast and costs nothing for hobby traffic.
+
+Do not drop to `openai/gpt-oss-20b` to save quota. It has the same rate limits and the same latency, but it
+fails this task roughly half the time: it leaks `<|constrain|>` channel markers, narrates its own rule
+compliance, repeats its answer several times over, and hands the input straight back. Measured over matched
+runs, 20b was clean 3 times in 6 while 120b was clean 6 in 6, and the gap held across two prompt variants.
 
 | Variable                | Default                          | Notes                                     |
 | ----------------------- | -------------------------------- | ----------------------------------------- |
 | `LLM_API_KEY`           | (required)                       | Groq key from console.groq.com/keys       |
 | `LLM_BASE_URL`          | `https://api.groq.com/openai/v1` | Swap for OpenRouter, Together, etc.       |
-| `LLM_MODEL`             | `openai/gpt-oss-20b`             | Any chat model the endpoint supports      |
+| `LLM_MODEL`             | `openai/gpt-oss-120b`            | Any chat model the endpoint supports      |
 | `LLM_REASONING_EFFORT`  | `low`                            | gpt-oss only. Clear it for other models.  |
 | `NEXT_PUBLIC_SITE_URL`  | (falls back to the Vercel URL)   | Canonical origin, no trailing slash.      |
 
@@ -48,10 +53,14 @@ card image all fall back to the Vercel deployment URL on their own.
 
 ## Free tier limits
 
-Groq's free plan allows 30 requests a minute and 200,000 tokens a day. A typical translation costs about 440
-tokens and a maximum-length one about 705, so the real ceiling is roughly 300 to 450 translations per day
-across all visitors. Exceeding it returns a rate-limit error rather than a charge. The key is shared by
-everyone using the site, so one heavy user can exhaust the daily pool.
+Groq's free plan allows 30 requests a minute, 1,000 a day, and 8,000 tokens a minute. A typical translation
+costs about 440 tokens, so the real ceiling is a few hundred translations a day across all visitors.
+Exceeding it returns a rate-limit error rather than a charge. The key is shared by everyone using the site,
+so one heavy user can exhaust the pool.
+
+The limits refill continuously rather than resetting at a fixed hour. Requests come back at one every 86.4
+seconds, and the per-minute token bucket refills in about three seconds per translation. A burst therefore
+degrades into a trickle instead of shutting the site off until tomorrow. Each model has its own bucket.
 
 ## SEO
 
