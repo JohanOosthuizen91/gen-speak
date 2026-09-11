@@ -37,9 +37,11 @@ export const GENERATIONS: Generation[] = [
       "no cap", "bussin", "W/L", "cooked", "ratio", "sus", "goated", "mogging", "gg",
       "aura", "aura points", "negative aura", "aura farming", "chat", "tweaking",
       "crash out", "glazing", "brain rot", "chopped", "NPC", "drip", "sheesh", "yeet",
-      "cap", "bet", "6-7", "diabolical", "cooking",
+      "cap", "bet", "diabolical", "cooking",
+      // "6-7" is deliberately absent: it hijacked real numbers, turning "lands at 6pm"
+      // into "lands 6-7". It stays in the dictionary below so decoding still explains it.
     ],
-    slangCap: 4,
+    slangCap: 6,
     blurb:
       "The first generation who never knew a world without tablets. Their slang comes straight off YouTube Shorts, Roblox lobbies and TikTok, and it mutates faster than any before it. Words often carry no fixed meaning at all, working instead as pure emphasis.",
     terms: [
