@@ -9,21 +9,27 @@ export function Glossary() {
         translator is drawing on, and what the words actually mean.
       </p>
 
-      {GENERATIONS.map((g) => (
-        <article key={g.id} className="gloss" style={{ borderColor: g.accent }}>
-          <h3>
-            <span aria-hidden>{g.emoji}</span> {g.label} <small>{g.years}</small>
-          </h3>
-          <p>{g.blurb}</p>
-          <dl>
-            {g.terms.map((t) => (
-              <div key={t.term}>
-                <dt style={{ background: g.accentSoft, color: g.ink }}>{t.term}</dt>
-                <dd>{t.meaning}</dd>
-              </div>
-            ))}
-          </dl>
-        </article>
+      {/* <details> keeps collapsed text in the HTML, so search engines still index every entry. */}
+      {GENERATIONS.map((g, i) => (
+        <details key={g.id} className="gloss" style={{ borderColor: g.accent }} open={i === 0}>
+          <summary>
+            <h3>
+              <span aria-hidden>{g.emoji}</span> {g.label} <small>{g.years}</small>
+            </h3>
+            <span className="marker" aria-hidden />
+          </summary>
+          <div className="gloss-body">
+            <p>{g.blurb}</p>
+            <dl>
+              {g.terms.map((t) => (
+                <div key={t.term}>
+                  <dt style={{ background: g.accentSoft, color: g.ink }}>{t.term}</dt>
+                  <dd>{t.meaning}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </details>
       ))}
 
       <h2>Questions people ask</h2>

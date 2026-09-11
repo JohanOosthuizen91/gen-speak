@@ -309,6 +309,10 @@ textarea::placeholder { color: #b5afa3; }
   margin: 0 0 12px;
 }
 
+.glossary > h2:not(:first-child) {
+  margin-top: 44px;
+}
+
 .glossary h2 + .lede {
   margin: 0 0 28px;
   font-size: 17px;
@@ -321,12 +325,70 @@ textarea::placeholder { color: #b5afa3; }
   border: 2px solid var(--ink);
   border-left-width: 10px;
   background: #fff;
-  padding: 20px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
+}
+
+.gloss summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  transition: background 0.15s ease;
+}
+
+.gloss summary::-webkit-details-marker { display: none; }
+
+.gloss summary:hover { background: #faf8f3; }
+
+.gloss summary:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: -3px;
+}
+
+.gloss .marker {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  position: relative;
+}
+
+.gloss .marker::before,
+.gloss .marker::after {
+  content: "";
+  position: absolute;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.gloss .marker::before {
+  top: 10px;
+  left: 2px;
+  width: 18px;
+  height: 3px;
+}
+
+.gloss .marker::after {
+  top: 2px;
+  left: 9.5px;
+  width: 3px;
+  height: 18px;
+}
+
+.gloss[open] .marker::after {
+  transform: rotate(90deg);
+  opacity: 0;
+}
+
+.gloss-body {
+  padding: 0 20px 20px;
 }
 
 .gloss h3 {
-  margin: 0 0 10px;
+  margin: 0;
   font-size: 21px;
   display: flex;
   align-items: center;
@@ -340,7 +402,7 @@ textarea::placeholder { color: #b5afa3; }
   color: var(--muted);
 }
 
-.gloss > p {
+.gloss-body > p {
   margin: 0 0 16px;
   font-size: 16px;
   line-height: 1.6;
@@ -438,6 +500,8 @@ footer a { color: inherit; }
   textarea { font-size: 18px; }
   .result p { font-size: 20px; }
   .gen small { display: none; }
-  .gloss, .faq { padding: 16px; }
+  .faq { padding: 16px; }
+  .gloss summary { padding: 14px 16px; }
+  .gloss-body { padding: 0 16px 16px; }
   .glossary { margin-top: 48px; }
 }
