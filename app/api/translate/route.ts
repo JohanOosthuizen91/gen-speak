@@ -86,15 +86,28 @@ export async function POST(req: Request) {
   // Only the gpt-oss models accept reasoning_effort; others reject the request with a 400.
   const reasoningEffort = process.env.LLM_REASONING_EFFORT?.trim();
 
+  // A fixed word list makes the model pick the same favourite every time. Showing a
+  // different handful per request is what actually varies the output across users.
+  const palette = [...generation.vocabulary].sort(() => Math.random() - 0.5).slice(0, 7);
+
   const systemPrompt = `You are a slang translator. Rewrite the user's message so it sounds like it was written by a typical member of this generation:
 
 ${generation.styleGuide}
+
+Slang available for this rewrite: ${palette.join(", ")}.
 
 Rules:
 - Preserve the original meaning and intent. Do not add new facts.
 - Reply with exactly one short paragraph, roughly the length of the input.
 - Replace the original wording with slang equivalents. Most content words must
   differ from the input.
+- Use at most two words from that slang list, chosen because they fit this
+  particular message. Ignore the rest. Everything else should be ordinary English
+  in that generation's rhythm.
+- Do not end on a tag phrase such as "no cap", "periodt", "fr fr" or "word".
+  Finish on the actual point of the message.
+- Do not open with a throwaway interjection such as "Yo", "Well" or "Honestly".
+  Start on the substance of the message instead.
 - Use the capitalisation habits of the generation described above.
 - Write as the sender of the message, speaking to the same reader.
 - Be funny, never mean or offensive.
