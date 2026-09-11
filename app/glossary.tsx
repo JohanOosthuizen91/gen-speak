@@ -47,8 +47,8 @@ export function Glossary() {
         </dd>
         <dt>Does it work the other way round?</dt>
         <dd>
-          Not yet. It translates from plain English into a generation&apos;s slang, rather than decoding slang back into
-          plain English.
+          Yes. Switch to slang to English and paste in a phrase you don&apos;t recognise. You do not need to know which
+          generation it came from, since that direction reads all five.
         </dd>
       </dl>
     </section>

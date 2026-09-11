@@ -13,10 +13,19 @@ const SAMPLES = [
   "Sorry I'm late, my alarm didn't go off.",
 ];
 
-type Result = { gen: Generation; text: string };
+const SLANG_SAMPLES = [
+  "not going out tonight, lowkey staying in for a movie marathon 💀 it's giving hermit era",
+  "yo that spot was straight bussin no cap 🔥 W for the squad fr",
+  "Well I'll be, the grocery bills these days are just not hunky-dory… in my day a loaf cost pennies.",
+  "my bad i'm late, alarm ghosted me, i'm cooked",
+];
+
+type Direction = "to-slang" | "to-plain";
+type Result = { gen: Generation | null; text: string };
 
 export function Translator({ children }: { children: ReactNode }) {
   const [text, setText] = useState("");
+  const [direction, setDirection] = useState<Direction>("to-slang");
   const [gen, setGen] = useState<Generation>(GENERATIONS[1]);
   const [result, setResult] = useState<Result | null>(null);
   const [loading, setLoading] = useState(false);
@@ -27,8 +36,18 @@ export function Translator({ children }: { children: ReactNode }) {
 
   useEffect(() => setCanNativeShare(typeof navigator !== "undefined" && !!navigator.share), []);
 
+  const toPlain = direction === "to-plain";
   const over = text.length > MAX;
   const canGo = text.trim().length > 0 && !over && !loading;
+
+  function switchTo(next: Direction) {
+    if (next === direction) return;
+    setDirection(next);
+    setResult(null);
+    setError(null);
+    // Carry the last result across so flipping direction can translate it straight back.
+    setText(result?.text ?? "");
+  }
 
   function say(message: string) {
     setFlash(message);
@@ -44,11 +63,11 @@ export function Translator({ children }: { children: ReactNode }) {
       const res = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, generation: gen.id }),
+        body: JSON.stringify({ text, generation: gen.id, direction }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Something went wrong.");
-      setResult({ gen, text: data.translation });
+      setResult({ gen: toPlain ? null : gen, text: data.translation });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
@@ -57,7 +76,8 @@ export function Translator({ children }: { children: ReactNode }) {
   }
 
   function shareText(r: Result) {
-    return `“${r.text}”\n\n— my English, translated into ${r.gen.label} slang`;
+    const how = r.gen ? `my English, translated into ${r.gen.label} slang` : "slang, translated into plain English";
+    return `“${r.text}”\n\n— ${how}`;
   }
 
   async function nativeShare(r: Result) {
@@ -91,11 +111,12 @@ export function Translator({ children }: { children: ReactNode }) {
   }
 
   const theme = { "--accent": gen.accent, "--accent-soft": gen.accentSoft } as CSSProperties;
-  const shown = result?.gen ?? gen;
+  // Plain English gets the neutral house style rather than any generation's look.
+  const shown = toPlain ? null : (result?.gen ?? gen);
   const resultTheme = {
-    "--accent-soft": shown.accentSoft,
-    "--result-ink": shown.ink,
-    "--result-font": shown.font,
+    "--accent-soft": shown?.accentSoft ?? "#f0ece2",
+    "--result-ink": shown?.ink ?? "#141210",
+    "--result-font": shown?.font ?? "var(--font-ui)",
   } as CSSProperties;
 
   return (
@@ -104,37 +125,58 @@ export function Translator({ children }: { children: ReactNode }) {
         <header>
           <span className="kicker">Generational translator</span>
           <h1>
-            Say it like a <span className="swap">{gen.label}</span>
+            {toPlain ? (
+              <>
+                What does <span className="swap">that</span> mean?
+              </>
+            ) : (
+              <>
+                Say it like a <span className="swap">{gen.label}</span>
+              </>
+            )}
           </h1>
           <p className="sub">
-            Type plain English, pick a generation, and get it back in their slang. {gen.emoji} {gen.tagline}
+            {toPlain
+              ? "Paste slang you don't recognise and get it back in plain English. Works with any generation. 🔍"
+              : `Type plain English, pick a generation, and get it back in their slang. ${gen.emoji} ${gen.tagline}`}
           </p>
         </header>
 
-        <ul className="gens" aria-label="Pick a generation">
-          {GENERATIONS.map((g) => (
-            <li key={g.id}>
-              <button
-                type="button"
-                className="gen"
-                aria-pressed={g.id === gen.id}
-                style={{ "--gen-accent": g.accent } as CSSProperties}
-                onClick={() => setGen(g)}
-              >
-                <span aria-hidden>{g.emoji}</span>
-                {g.label}
-                <small>{g.years}</small>
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div className="direction" role="group" aria-label="Translation direction">
+          <button type="button" aria-pressed={!toPlain} onClick={() => switchTo("to-slang")}>
+            English to slang
+          </button>
+          <button type="button" aria-pressed={toPlain} onClick={() => switchTo("to-plain")}>
+            Slang to English
+          </button>
+        </div>
+
+        {!toPlain && (
+          <ul className="gens" aria-label="Pick a generation">
+            {GENERATIONS.map((g) => (
+              <li key={g.id}>
+                <button
+                  type="button"
+                  className="gen"
+                  aria-pressed={g.id === gen.id}
+                  style={{ "--gen-accent": g.accent } as CSSProperties}
+                  onClick={() => setGen(g)}
+                >
+                  <span aria-hidden>{g.emoji}</span>
+                  {g.label}
+                  <small>{g.years}</small>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
 
         <section className="card">
-          <label htmlFor="input">Plain English</label>
+          <label htmlFor="input">{toPlain ? "Slang" : "Plain English"}</label>
           <textarea
             id="input"
             value={text}
-            placeholder="Type something normal…"
+            placeholder={toPlain ? "Paste the slang you're stuck on…" : "Type something normal…"}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
               if ((e.metaKey || e.ctrlKey) && e.key === "Enter") translate();
@@ -145,12 +187,12 @@ export function Translator({ children }: { children: ReactNode }) {
               {text.length}/{MAX} · Ctrl+Enter to translate
             </span>
             <button type="button" className="btn" onClick={translate} disabled={!canGo}>
-              {loading ? "Translating" : `Translate to ${gen.label}`}
+              {loading ? "Translating" : toPlain ? "Translate to plain English" : `Translate to ${gen.label}`}
               {loading && <span className="dots" />}
             </button>
           </div>
           <div className="samples">
-            {SAMPLES.map((s) => (
+            {(toPlain ? SLANG_SAMPLES : SAMPLES).map((s) => (
               <button key={s} type="button" className="sample" onClick={() => setText(s)}>
                 {s.length > 42 ? s.slice(0, 42) + "…" : s}
               </button>
@@ -169,9 +211,9 @@ export function Translator({ children }: { children: ReactNode }) {
             <div className="head">
               <div className="who">
                 <span className="emoji" aria-hidden>
-                  {shown.emoji}
+                  {shown?.emoji ?? "🔍"}
                 </span>
-                {shown.label} says
+                {shown ? `${shown.label} says` : "In plain English"}
               </div>
             </div>
             <p>{loading ? "Cooking…" : result?.text}</p>

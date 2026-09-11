@@ -1,6 +1,12 @@
 # GenSpeak
 
-Type plain English, pick a generation, get it back in their slang. Next.js App Router, one API route, no database.
+Type plain English, pick a generation, get it back in their slang. Or paste slang you don't recognise and get
+plain English back. Next.js App Router, one API route, no database.
+
+`POST /api/translate` takes `{ text, generation, direction }`. `direction` is `to-slang` (the default when
+omitted) or `to-plain`. Decoding ignores `generation` and hands the model every generation's vocabulary at
+once, so the reader does not need to know where the slang came from. The guard that retries a barely-changed
+answer is skipped when decoding, since lightly slangy input legitimately decodes to nearly itself.
 
 ## Run locally
 

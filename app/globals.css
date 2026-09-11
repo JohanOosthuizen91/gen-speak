@@ -72,6 +72,41 @@ h1 .swap {
   max-width: 560px;
 }
 
+.direction {
+  display: inline-flex;
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  margin-bottom: 22px;
+  background: #fff;
+}
+
+.direction button {
+  appearance: none;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.direction button + button {
+  border-left: 2px solid var(--ink);
+}
+
+.direction button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--ink);
+}
+
+.direction button:not([aria-pressed="true"]):hover {
+  background: #f5f2ea;
+  color: var(--ink);
+}
+
 .gens {
   display: flex;
   flex-wrap: wrap;

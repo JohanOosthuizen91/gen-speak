@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { GENERATION_MAP, type GenerationId } from "@/lib/generations";
+import { GENERATIONS, GENERATION_MAP, type GenerationId } from "@/lib/generations";
 
 const MAX_INPUT_CHARS = 600;
 
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: { text?: string; generation?: string };
+  let body: { text?: string; generation?: string; direction?: string };
   try {
     body = await req.json();
   } catch {
@@ -74,12 +74,14 @@ export async function POST(req: Request) {
   }
 
   const text = body.text?.trim() ?? "";
+  const toPlain = body.direction === "to-plain";
   const generation = GENERATION_MAP[body.generation as GenerationId];
 
   if (!text) return NextResponse.json({ error: "Type something to translate." }, { status: 400 });
   if (text.length > MAX_INPUT_CHARS)
     return NextResponse.json({ error: `Keep it under ${MAX_INPUT_CHARS} characters.` }, { status: 400 });
-  if (!generation) return NextResponse.json({ error: "Unknown generation." }, { status: 400 });
+  // Decoding works on any slang, so it needs no generation. Encoding needs one.
+  if (!toPlain && !generation) return NextResponse.json({ error: "Unknown generation." }, { status: 400 });
 
   const baseUrl = (process.env.LLM_BASE_URL ?? "https://api.groq.com/openai/v1").replace(/\/$/, "");
   const model = process.env.LLM_MODEL ?? "openai/gpt-oss-120b";
@@ -88,11 +90,27 @@ export async function POST(req: Request) {
 
   // A fixed word list makes the model pick the same favourite every time. Showing a
   // different handful per request is what actually varies the output across users.
-  const palette = [...generation.vocabulary].sort(() => Math.random() - 0.5).slice(0, 7);
+  const palette = generation ? [...generation.vocabulary].sort(() => Math.random() - 0.5).slice(0, 7) : [];
 
-  const systemPrompt = `You are a slang translator. Rewrite the user's message so it sounds like it was written by a typical member of this generation:
+  const decodePrompt = `You are a slang decoder. Rewrite the user's message in plain, neutral English that anyone could understand.
 
-${generation.styleGuide}
+The message may use the slang of any of these generations: ${GENERATIONS.map((g) => g.label).join(", ")}.
+
+Terms you may encounter: ${GENERATIONS.flatMap((g) => g.vocabulary).join(", ")}.
+
+Rules:
+- Preserve the original meaning, intent and tone. Do not add new facts.
+- Reply with exactly one short paragraph, roughly the length of the input.
+- Remove all slang, hashtags and emoji. Use ordinary words in their place.
+- Write in normal sentence case with ordinary punctuation.
+- Write as the sender of the message, speaking to the same reader.
+- Do not explain the slang or comment on it. Just say what the message means.
+- If a word has no clear meaning here, leave it out rather than guessing.
+- Your entire reply is the plain English version and nothing else.`;
+
+  const encodePrompt = `You are a slang translator. Rewrite the user's message so it sounds like it was written by a typical member of this generation:
+
+${generation?.styleGuide}
 
 Slang available for this rewrite: ${palette.join(", ")}.
 
@@ -112,6 +130,8 @@ Rules:
 - Write as the sender of the message, speaking to the same reader.
 - Be funny, never mean or offensive.
 - Your entire reply is the rewritten message and nothing else.`;
+
+  const systemPrompt = toPlain ? decodePrompt : encodePrompt;
 
   async function attempt() {
     const upstream = await fetch(`${baseUrl}/chat/completions`, {
@@ -151,7 +171,8 @@ Rules:
 
   // The model sometimes hands the input back with only emoji or a slang word bolted on.
   // One more try is cheap, and the first answer still stands if the retry is no better.
-  if (outcome.ok && isWeakRewrite(outcome.translation, text)) {
+  // Decoding is exempt: lightly slangy input legitimately decodes to nearly itself.
+  if (!toPlain && outcome.ok && isWeakRewrite(outcome.translation, text)) {
     const retry = await attempt();
     if (retry.ok && retry.translation && !isWeakRewrite(retry.translation, text)) outcome = retry;
   }

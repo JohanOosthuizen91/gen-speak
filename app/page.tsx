@@ -32,7 +32,7 @@ function StructuredData() {
         ],
         [
           "Does it work the other way round?",
-          "Not yet. It translates plain English into slang, rather than decoding slang back into plain English.",
+          "Yes. Switch to slang to English and paste in a phrase you do not recognise. You do not need to know which generation it came from, since that direction reads all five.",
         ],
       ].map(([question, answer]) => ({
         "@type": "Question",

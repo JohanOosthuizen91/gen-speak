@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   keywords: [
     "generational translator",
     "slang translator",
+    "slang to english translator",
+    "gen z to english",
+    "what does this slang mean",
     "gen z translator",
     "gen alpha translator",
     "millennial slang",
