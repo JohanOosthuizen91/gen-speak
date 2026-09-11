@@ -186,20 +186,41 @@ export function Translator({ children }: { children: ReactNode }) {
                       Share
                     </button>
                   )}
-                  <button type="button" className="chip x" onClick={() => openShare(result, "x")}>
-                    <XIcon />X
+                  <button
+                    type="button"
+                    className="chip only-icon x"
+                    onClick={() => openShare(result, "x")}
+                    aria-label="Share on X"
+                    title="Share on X"
+                  >
+                    <XIcon />
                   </button>
-                  <button type="button" className="chip whatsapp" onClick={() => openShare(result, "whatsapp")}>
+                  <button
+                    type="button"
+                    className="chip only-icon whatsapp"
+                    onClick={() => openShare(result, "whatsapp")}
+                    aria-label="Share on WhatsApp"
+                    title="Share on WhatsApp"
+                  >
                     <WhatsAppIcon />
-                    WhatsApp
                   </button>
-                  <button type="button" className="chip reddit" onClick={() => openShare(result, "reddit")}>
+                  <button
+                    type="button"
+                    className="chip only-icon reddit"
+                    onClick={() => openShare(result, "reddit")}
+                    aria-label="Share on Reddit"
+                    title="Share on Reddit"
+                  >
                     <RedditIcon />
-                    Reddit
                   </button>
-                  <button type="button" className="chip facebook" onClick={() => openShare(result, "facebook")}>
+                  <button
+                    type="button"
+                    className="chip only-icon facebook"
+                    onClick={() => openShare(result, "facebook")}
+                    aria-label="Share on Facebook"
+                    title="Share on Facebook"
+                  >
                     <FacebookIcon />
-                    Facebook
                   </button>
                   <button type="button" className="chip" onClick={() => copyTranslation(result)}>
                     <CopyIcon />
