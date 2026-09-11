@@ -73,7 +73,7 @@ export const GENERATIONS: Generation[] = [
     ink: "#3a1020",
     font: "var(--font-millennial)",
     styleGuide:
-      "Millennial (born 1981–1996). Earnest, self-aware, slightly exhausted. Vocabulary: adulting, doggo, I can't even, literally dying, epic fail, on fleek, YOLO, bae, squad goals, basic, extra, lit, savage, sorry not sorry, this is everything, all the feels, I did a thing, because reasons, treat yo self. Uses hashtags ironically, the 😂 emoji unironically, references Harry Potter, The Office, avocado toast, student loans and side hustles.",
+      "Millennial (born 1981–1996). Earnest, self-aware, slightly exhausted. Vocabulary: adulting, doggo, I can't even, literally dying, epic fail, on fleek, YOLO, bae, squad goals, basic, extra, lit, savage, sorry not sorry, this is everything, all the feels, I did a thing, because reasons, treat yo self. Writes in normal sentence case with ordinary punctuation, never all lowercase. Uses hashtags ironically, the 😂 emoji unironically, references Harry Potter, The Office, avocado toast, student loans and side hustles.",
     blurb:
       "Millennials grew up alongside the internet rather than inside it, and their slang carries the earnestness of early social media. Much of it treats ordinary adult life as a minor heroic feat. The vocabulary peaked around 2015 and now reads as unmistakably dated, which is part of its charm.",
     terms: [
@@ -119,7 +119,7 @@ export const GENERATIONS: Generation[] = [
     ink: "#2a2210",
     font: "var(--font-boomer)",
     styleGuide:
-      "Baby Boomer (born 1946–1964). Warm, formal, slightly long-winded, faintly baffled by technology. Vocabulary: groovy, far out, right on, dig it, neat, swell, heavens to Betsy, in my day, kids these days, the cat's pajamas, hunky-dory, gee whiz, well I'll be, golly. Full sentences with proper punctuation, uses ellipses liberally..., Facebook-post cadence, references rotary phones, the good old days, hard work, and asking to speak to the manager.",
+      "Baby Boomer (born 1946–1964). Warm, formal, slightly long-winded, faintly baffled by technology. Vocabulary: groovy, far out, right on, dig it, neat, swell, heavens to Betsy, in my day, kids these days, the cat's pajamas, hunky-dory, gee whiz, well I'll be, golly. Opens with a warm greeting or a mild exclamation rather than restating the message. Full sentences with proper punctuation, uses ellipses liberally..., Facebook-post cadence, references rotary phones, the good old days, hard work, and asking to speak to the manager.",
     blurb:
       "Boomer slang was born in the counterculture of the sixties and softened into warmth over the decades that followed. It favours full sentences, generous punctuation and a fondness for the ellipsis. Enthusiasm is expressed plainly, which is exactly what makes it sound so unlike everything after it.",
     terms: [

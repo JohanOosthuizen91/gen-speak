@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type CSSProperties, type ReactNode } from "react";
 import { GENERATIONS, type Generation } from "@/lib/generations";
+import { XIcon, WhatsAppIcon, RedditIcon, FacebookIcon, ShareIcon, CopyIcon, LinkIcon } from "./icons";
 
 const MAX = 600;
 
@@ -181,25 +182,31 @@ export function Translator({ children }: { children: ReactNode }) {
                 <div className="share-btns">
                   {canNativeShare && (
                     <button type="button" className="chip" onClick={() => nativeShare(result)}>
+                      <ShareIcon />
                       Share
                     </button>
                   )}
-                  <button type="button" className="chip" onClick={() => openShare(result, "x")}>
-                    X
+                  <button type="button" className="chip x" onClick={() => openShare(result, "x")}>
+                    <XIcon />X
                   </button>
-                  <button type="button" className="chip" onClick={() => openShare(result, "whatsapp")}>
+                  <button type="button" className="chip whatsapp" onClick={() => openShare(result, "whatsapp")}>
+                    <WhatsAppIcon />
                     WhatsApp
                   </button>
-                  <button type="button" className="chip" onClick={() => openShare(result, "reddit")}>
+                  <button type="button" className="chip reddit" onClick={() => openShare(result, "reddit")}>
+                    <RedditIcon />
                     Reddit
                   </button>
-                  <button type="button" className="chip" onClick={() => openShare(result, "facebook")}>
+                  <button type="button" className="chip facebook" onClick={() => openShare(result, "facebook")}>
+                    <FacebookIcon />
                     Facebook
                   </button>
                   <button type="button" className="chip" onClick={() => copyTranslation(result)}>
+                    <CopyIcon />
                     Copy text
                   </button>
                   <button type="button" className="chip" onClick={copyLink}>
+                    <LinkIcon />
                     Copy link
                   </button>
                 </div>
