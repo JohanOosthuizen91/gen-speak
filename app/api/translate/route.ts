@@ -92,20 +92,33 @@ export async function POST(req: Request) {
   // different handful per request is what actually varies the output across users.
   const palette = generation ? [...generation.vocabulary].sort(() => Math.random() - 0.5).slice(0, 7) : [];
 
+  // The model invents plausible-sounding meanings for niche terms, so any curated
+  // definition that actually appears in the input is handed over. Filtering to the
+  // ones present keeps this to a few lines instead of the whole glossary.
+  const lowerText = text.toLowerCase();
+  const known = GENERATIONS.flatMap((g) => g.terms)
+    .filter((t) => lowerText.includes(t.term.toLowerCase()))
+    .map((t) => `${t.term}: ${t.meaning}`);
+
   const decodePrompt = `You are a slang decoder. Rewrite the user's message in plain, neutral English that anyone could understand.
 
 The message may use the slang of any of these generations: ${GENERATIONS.map((g) => g.label).join(", ")}.
 
 Terms you may encounter: ${GENERATIONS.flatMap((g) => g.vocabulary).join(", ")}.
+${known.length ? `\nDefinitions to use, in preference to your own: \n${known.join("\n")}\n` : ""}
+The input is either a whole message or a single term someone wants defined. Handle both.
 
 Rules:
-- Preserve the original meaning, intent and tone. Do not add new facts.
-- Reply with exactly one short paragraph, roughly the length of the input.
-- Remove all slang, hashtags and emoji. Use ordinary words in their place.
+- If it is a message, rewrite it the way the sender would have put it in plain
+  English. Keep the meaning, intent and tone, stay roughly the same length, and
+  leave no slang, hashtags or emoji behind. Do not comment on the slang itself.
+- If it is a bare word or short phrase rather than a message, define it instead:
+  one or two plain sentences saying what it means and how people use it.
+- Never repeat the input back. If your reply says the same words as the input,
+  you have not answered.
+- Do not add new facts.
 - Write in normal sentence case with ordinary punctuation.
-- Write as the sender of the message, speaking to the same reader.
-- Do not explain the slang or comment on it. Just say what the message means.
-- If a word has no clear meaning here, leave it out rather than guessing.
+- If a term has no established meaning, say so plainly rather than inventing one.
 - Your entire reply is the plain English version and nothing else.`;
 
   const encodePrompt = `You are a slang translator. Rewrite the user's message so it sounds like it was written by a typical member of this generation:
@@ -169,12 +182,16 @@ Rules:
 
   let outcome = await attempt();
 
-  // The model sometimes hands the input back with only emoji or a slang word bolted on.
+  // Decoding only rejects an exact echo. A lightly slangy sentence legitimately
+  // decodes to nearly itself, but never to precisely itself, and a bare term that
+  // comes back unchanged means the model defined nothing.
+  const unchanged = (out: string) =>
+    toPlain ? normalize(out) === normalize(text) : isWeakRewrite(out, text);
+
   // One more try is cheap, and the first answer still stands if the retry is no better.
-  // Decoding is exempt: lightly slangy input legitimately decodes to nearly itself.
-  if (!toPlain && outcome.ok && isWeakRewrite(outcome.translation, text)) {
+  if (outcome.ok && unchanged(outcome.translation)) {
     const retry = await attempt();
-    if (retry.ok && retry.translation && !isWeakRewrite(retry.translation, text)) outcome = retry;
+    if (retry.ok && retry.translation && !unchanged(retry.translation)) outcome = retry;
   }
 
   if (!outcome.ok) {
@@ -190,5 +207,9 @@ Rules:
   const translation = outcome.translation;
   if (!translation) return NextResponse.json({ error: "Empty response from model." }, { status: 502 });
 
-  return NextResponse.json({ translation: translation.replace(/^["“]|["”]$/g, "") });
+  // Only unwrap when the whole reply is quoted and holds no quotes of its own.
+  // A definition like: "Rizz" refers to charisma, short for "charisma." starts and
+  // ends with a quote without being a quoted string, and must be left alone.
+  const wrapped = /^["“]([^"“”]*)["”]$/.exec(translation);
+  return NextResponse.json({ translation: wrapped ? wrapped[1].trim() : translation });
 }
