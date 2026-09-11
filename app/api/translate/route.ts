@@ -90,7 +90,7 @@ export async function POST(req: Request) {
 
   // A fixed word list makes the model pick the same favourite every time. Showing a
   // different handful per request is what actually varies the output across users.
-  const palette = generation ? [...generation.vocabulary].sort(() => Math.random() - 0.5).slice(0, 7) : [];
+  const palette = generation ? [...generation.vocabulary].sort(() => Math.random() - 0.5).slice(0, 9) : [];
 
   // The model invents plausible-sounding meanings for niche terms, so any curated
   // definition that actually appears in the input is handed over. Filtering to the
@@ -132,9 +132,11 @@ Rules:
 - Reply with exactly one short paragraph, roughly the length of the input.
 - Replace the original wording with slang equivalents. Most content words must
   differ from the input.
-- Use at most two words from that slang list, chosen because they fit this
+- Use up to ${generation?.slangCap ?? 2} words from that slang list, chosen because they fit this
   particular message. Ignore the rest. Everything else should be ordinary English
   in that generation's rhythm.
+- Any slang you add beyond that list must belong to this generation specifically.
+  Generic internet slang from a neighbouring generation breaks the impression.
 - Do not end on a tag phrase such as "no cap", "periodt", "fr fr" or "word".
   Finish on the actual point of the message.
 - Do not open with a throwaway interjection such as "Yo", "Well" or "Honestly".
