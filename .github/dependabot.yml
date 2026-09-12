@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    # Versions are pinned exactly, so every upgrade arrives as a pull request
+    # to review rather than as a side effect of installing.
+    open-pull-requests-limit: 5
+    groups:
+      # One PR for the routine patch and minor bumps; majors stay separate
+      # because they are the ones that actually need reading.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
