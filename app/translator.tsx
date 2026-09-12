@@ -6,6 +6,8 @@ import { XIcon, WhatsAppIcon, RedditIcon, FacebookIcon, ShareIcon, CopyIcon, Lin
 
 const MAX = 600;
 
+const KOFI = "https://ko-fi.com/johanoosthuizen";
+
 const SAMPLES = [
   "Hey team, quick reminder the quarterly report is due Friday. Let me know if you need anything.",
   "I'm not going out tonight, I'd rather stay in and watch a movie.",
@@ -273,6 +275,9 @@ export function Translator({ children }: { children: ReactNode }) {
                     Copy link
                   </button>
                 </div>
+                <a className="kofi-inline" href={KOFI} target="_blank" rel="noopener noreferrer">
+                  ☕ Made you laugh? Buy me a coffee
+                </a>
               </div>
             )}
           </section>
@@ -280,7 +285,16 @@ export function Translator({ children }: { children: ReactNode }) {
 
         {children}
 
-        <footer>Powered by a small open model. Slang may be exaggerated for comedic effect.</footer>
+        <footer>
+          <p>Powered by a small open model. Slang may be exaggerated for comedic effect.</p>
+          <p>
+            Free, with no ads and no sign-up.{" "}
+            <a className="kofi" href={KOFI} target="_blank" rel="noopener noreferrer">
+              Buy me a coffee
+            </a>{" "}
+            if it made you laugh.
+          </p>
+        </footer>
       </div>
     </main>
   );

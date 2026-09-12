@@ -548,14 +548,44 @@ textarea::placeholder { color: #b5afa3; }
   75% { content: "..."; }
 }
 
+/* Sits inside the result card, where someone has just got something worth having. */
+.kofi-inline {
+  display: inline-block;
+  margin-top: 12px;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--result-ink) 72%, transparent);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--result-ink) 30%, transparent);
+  padding-bottom: 1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.kofi-inline:hover {
+  color: var(--result-ink);
+  border-bottom-color: var(--result-ink);
+}
+
 footer {
   margin-top: 48px;
   font-size: 13px;
   color: var(--muted);
   text-align: center;
+  display: grid;
+  gap: 6px;
 }
 
+footer p { margin: 0; }
+
 footer a { color: inherit; }
+
+footer .kofi {
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 
 @media (max-width: 560px) {
   .wrap { padding: 32px 16px 64px; }
